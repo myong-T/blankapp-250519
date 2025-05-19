@@ -11,10 +11,8 @@ if "mole_position" not in st.session_state:
     st.session_state.mole_position = random.randint(0, 2)
 if "last_update" not in st.session_state:
     st.session_state.last_update = time.time()
-if "clicked_index" not in st.session_state:
-    st.session_state.clicked_index = None
 
-# 두더지 위치 업데이트 (1초마다)
+# 두더지 위치 1초마다 변경
 if time.time() - st.session_state.last_update > 1:
     st.session_state.mole_position = random.randint(0, 2)
     st.session_state.last_update = time.time()
@@ -22,15 +20,17 @@ if time.time() - st.session_state.last_update > 1:
 st.title("🎯 두더지 잡기 게임")
 st.markdown(f"### 점수: {st.session_state.score}")
 
-# 클릭 감지
-clicked = st.experimental_get_query_params().get("hit", [None])[0]
+# ✅ 최신 방식: query_params 처리
+query = st.query_params
+clicked = query.get("hit")
+
 if clicked is not None:
     clicked = int(clicked)
     if clicked == st.session_state.mole_position:
         st.session_state.score += 1
-    st.experimental_set_query_params()  # 클릭 후 URL 초기화
+    st.query_params.clear()  # URL 쿼리 초기화
 
-# 버튼 UI (HTML)
+# 버튼 표시
 cols = st.columns(3)
 for i in range(3):
     with cols[i]:
@@ -50,8 +50,8 @@ for i in range(3):
             </form>
         """, unsafe_allow_html=True)
 
-# 다시 시작 버튼
+# 점수 초기화 버튼
 if st.button("🔄 다시 시작"):
     st.session_state.score = 0
     st.session_state.mole_position = random.randint(0, 2)
-    st.experimental_set_query_params()
+    st.query_params.clear()
